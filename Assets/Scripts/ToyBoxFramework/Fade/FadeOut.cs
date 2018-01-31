@@ -12,7 +12,6 @@ namespace ToyBox {
 		/// </summary>
 		/// <param name="arg_fadeInfo">フェード情報</param>
 		public void OnEnter(Fade.FadeInfo arg_fadeInfo) {
-			AudioManager.Instance.QuickPlaySE ("SE_Events_Fade");
 			Color color = arg_fadeInfo.m_fadeObject.color;
 			color.a = arg_fadeInfo.m_currentAlpha;
 
