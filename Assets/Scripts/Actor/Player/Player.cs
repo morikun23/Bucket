@@ -55,6 +55,15 @@ namespace Bucket {
 		private Animator m_animator;
 
 		//----------------------------------------------
+			[Header("My Parts")]
+		//----------------------------------------------
+
+		/// <summary>索敵用コライダー</summary>
+		[SerializeField]
+		private CircleCollider2D m_searchArea;
+		
+
+		//----------------------------------------------
 			[Header("Status")]
 		//----------------------------------------------
 
@@ -77,6 +86,9 @@ namespace Bucket {
 
 		/// <summary>右移動フラグ</summary>
 		private bool m_rightRun;
+		
+		/// <summary>隠密フラグ</summary>
+		private bool m_hide;
 
 		/// <summary>死亡フラグ</summary>
 		private bool m_dead;
@@ -131,6 +143,7 @@ namespace Bucket {
 			m_currentState.OnUpdate();
 			#endregion
 
+			m_spriteRenderer.flipX = (m_currentDirection == Direction.RIGHT);
 		}
 
 		/// <summary>
@@ -141,25 +154,22 @@ namespace Bucket {
 			return m_currentState.GetType();
 		}
 
-		/// <summary>
-		/// 自身のジャンプ力でジャンプする
-		/// </summary>
-		private void Jump(Vector2 arg_direction) {
-			this.Jump(arg_direction , m_jumpPower);
+		public void Jump() {
+			m_jump = true;
 		}
 
 		/// <summary>
 		/// 指定されたジャンプ力でジャンプする
 		/// </summary>
 		/// <param name="arg_jumpPower">ジャンプ力</param>
-		private void Jump(Vector2 arg_direction , float arg_jumpPower) {
+		private void Jump(float arg_jumpPower) {
 
-			arg_direction.Normalize();
+			if (!m_isGrounded) return;
 
 			m_animator.SetTrigger("Jump");
 			//気持ちよくジャンプさせるため重力加速度をリセットする
 			m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x , 0);
-			m_rigidbody.AddForce(arg_direction * arg_jumpPower);
+			m_rigidbody.AddForce(Vector2.up * arg_jumpPower);
 
 		}
 

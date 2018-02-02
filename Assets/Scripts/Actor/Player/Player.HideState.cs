@@ -9,12 +9,12 @@ namespace Bucket {
 		/// <summary>
 		/// プレイヤーの静止状態
 		/// </summary>
-		public class IdleState : IPlayerState {
+		public class HideState : IPlayerState {
 
 			/// <summary>プレイヤーへの参照</summary>
 			private Player _;
 
-			public IdleState(Player arg_player) {
+			public HideState(Player arg_player) {
 				_ = arg_player;
 			}
 
@@ -22,7 +22,7 @@ namespace Bucket {
 			/// この状態になったときに実行される
 			/// </summary>
 			void IPlayerState.OnEnter() {
-				
+				_.m_searchArea.enabled = false;
 			}
 
 			/// <summary>
@@ -30,7 +30,6 @@ namespace Bucket {
 			/// </summary>
 			void IPlayerState.OnUpdate() {
 				if (_.m_jump) {
-					_.Jump(_.m_jumpPower);
 					_.m_jump = false;
 				}
 			}
@@ -39,7 +38,7 @@ namespace Bucket {
 			/// この状態ではなくなるときに実行される
 			/// </summary>
 			void IPlayerState.OnExit() {
-				
+				_.m_searchArea.enabled = true;
 			}
 
 			/// <summary>
@@ -48,11 +47,18 @@ namespace Bucket {
 			/// <returns></returns>
 			IPlayerState IPlayerState.GetNextState() {
 				if (_.m_dead) return new DeadState(_);
-				if (_.m_hide) return new HideState(_);
-				if (_.m_leftRun || _.m_rightRun) return new RunState(_);
+				if (!_.m_hide) return new IdleState(_);
 				return null;
 			}
 		}
 
+		public void Hide() {
+			m_hide = true;
+		}
+
+		public void Show() {
+			m_hide = false;
+		}
+		
 	}
 }

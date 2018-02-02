@@ -29,6 +29,12 @@ namespace Bucket {
 			/// この状態の間、毎フレーム実行される
 			/// </summary>
 			void IPlayerState.OnUpdate() {
+
+				if (_.m_jump) {
+					_.Jump(_.m_jumpPower);
+					_.m_jump = false;
+				}
+
 				if (_.m_leftRun && _.m_rightRun) {
 					_.m_rigidbody.velocity = new Vector3() {
 						x = 0 ,
@@ -68,6 +74,7 @@ namespace Bucket {
 			/// <returns></returns>
 			IPlayerState IPlayerState.GetNextState() {
 				if (_.m_dead) return new DeadState(_);
+				if (_.m_hide) return new HideState(_);
 				if (!(_.m_leftRun || _.m_rightRun)) return new IdleState(_);
 				return null;
 			}

@@ -29,6 +29,10 @@ namespace Bucket {
 			m_rightKey.AddCallBack(new CommandAction(InputTrigger.Release , OnMoveButtonUp , (int)ActorBase.Direction.RIGHT));
 			m_leftKey.AddCallBack(new CommandAction(InputTrigger.LongPress , OnMoveButtonDown , (int)ActorBase.Direction.LEFT));
 			m_leftKey.AddCallBack(new CommandAction(InputTrigger.Release , OnMoveButtonUp , (int)ActorBase.Direction.LEFT));
+			m_downKey.AddCallBack(new CommandAction(InputTrigger.Press , OnHideButtonDown));
+			m_downKey.AddCallBack(new CommandAction(InputTrigger.Release , OnHideButtonUp));
+
+			m_spaceKey.AddCallBack(new CommandAction(InputTrigger.Release , OnActionButtonDown));
 		}
 
 		// Update is called once per frame
@@ -55,6 +59,18 @@ namespace Bucket {
 				case (int)Player.Direction.RIGHT: m_player.Stop(Player.Direction.RIGHT); break;
 				default: Debug.LogError("ボタンからのコールバックが正しくありません"); break;
 			}
+		}
+
+		private void OnHideButtonDown() {
+			m_player.Hide();
+		}
+
+		private void OnHideButtonUp() {
+			m_player.Show();
+		}
+
+		private void OnActionButtonDown() {
+			m_player.Jump();
 		}
 
 	}
