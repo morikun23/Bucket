@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -8,7 +9,7 @@ namespace Bucket {
 	/// ゲーム内のプレイヤー
 	/// FSMの形式で実装されている
 	/// </summary>
-	public partial class Player : ActorBase {
+	public partial class Player : ActorBase , IHolderCallbackReciever {
 
 		/// <summary>
 		/// プレイヤーの状態
@@ -143,7 +144,10 @@ namespace Bucket {
 			m_currentState.OnUpdate();
 			#endregion
 
-			m_spriteRenderer.flipX = (m_currentDirection == Direction.RIGHT);
+			transform.localScale = new Vector3(
+				-(int)m_currentDirection,
+				transform.localScale.y,
+				transform.localScale.z);
 		}
 
 		/// <summary>
@@ -170,7 +174,6 @@ namespace Bucket {
 			//気持ちよくジャンプさせるため重力加速度をリセットする
 			m_rigidbody.velocity = new Vector2(m_rigidbody.velocity.x , 0);
 			m_rigidbody.AddForce(Vector2.up * arg_jumpPower);
-
 		}
 
 		/// <summary>
@@ -186,6 +189,10 @@ namespace Bucket {
 				m_currentState = arg_nextState;
 				m_currentState.OnEnter();
 			}
+		}
+
+		public bool IsGrounded() {
+			return m_isGrounded;
 		}
 
 		//---------------------------------------------------
@@ -209,6 +216,22 @@ namespace Bucket {
 		private void OnGroundExit() {
 			m_animator.SetBool("OnGround" , false);
 			m_isGrounded = false;
+		}
+
+		/// <summary>
+		/// アイテムを掴む時に実行される
+		/// </summary>
+		/// <param name="arg_holder"></param>
+		void IHolderCallbackReciever.OnItemGrasp(ItemHolder arg_holder) {
+			m_animator.SetBool("Grasp" , true);
+		}
+
+		/// <summary>
+		/// アイテムを放出するときに実行される
+		/// </summary>
+		/// <param name="arg_holder"></param>
+		void IHolderCallbackReciever.OnItemRelease(ItemHolder arg_holder) {
+			m_animator.SetBool("Grasp" , false);
 		}
 	}
 }

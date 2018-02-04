@@ -9,6 +9,9 @@ namespace Bucket {
 		private Player m_player;
 
 		[SerializeField]
+		private ItemHolder m_itemHolder;
+		
+		[SerializeField]
 		private InputCommand m_leftKey;
 
 		[SerializeField]
@@ -32,7 +35,7 @@ namespace Bucket {
 			m_downKey.AddCallBack(new CommandAction(InputTrigger.Press , OnHideButtonDown));
 			m_downKey.AddCallBack(new CommandAction(InputTrigger.Release , OnHideButtonUp));
 
-			m_spaceKey.AddCallBack(new CommandAction(InputTrigger.Release , OnActionButtonDown));
+			m_spaceKey.AddCallBack(new CommandAction(InputTrigger.Press , OnActionButtonDown));
 		}
 
 		// Update is called once per frame
@@ -70,8 +73,24 @@ namespace Bucket {
 		}
 
 		private void OnActionButtonDown() {
+
+			if(m_player.GetCurrentState() == typeof(Player.HideState)) {
+				return;
+			}
+
+			if(m_itemHolder.IsHolding()){
+				m_itemHolder.Throw();
+				return;
+			}
+			else{
+				if (m_player.IsGrounded()) {
+					m_itemHolder.Grasp();
+					if (m_itemHolder.IsHolding()) {
+						return;
+					}
+				}
+			}
 			m_player.Jump();
 		}
-
 	}
 }
