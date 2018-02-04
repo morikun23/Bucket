@@ -10,7 +10,8 @@ namespace Bucket {
 			RIGHT = 1
 		}
 
-		protected Direction m_currentDirection;
+		[SerializeField]
+		protected Direction m_currentDirection = Direction.RIGHT;
 
 		protected float m_moveSpeed;
 
