@@ -23,6 +23,7 @@ namespace Bucket {
 			/// </summary>
 			void IPlayerState.OnEnter() {
 				_.m_searchArea.enabled = false;
+				_.m_animator.SetBool("Hide" , true);
 			}
 
 			/// <summary>
@@ -39,6 +40,7 @@ namespace Bucket {
 			/// </summary>
 			void IPlayerState.OnExit() {
 				_.m_searchArea.enabled = true;
+				_.m_animator.SetBool("Hide" , false);
 			}
 
 			/// <summary>

@@ -145,7 +145,7 @@ namespace Bucket {
 			#endregion
 
 			transform.localScale = new Vector3(
-				-(int)m_currentDirection,
+				(int)m_currentDirection,
 				transform.localScale.y,
 				transform.localScale.z);
 		}
