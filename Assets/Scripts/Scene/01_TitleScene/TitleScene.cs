@@ -26,7 +26,7 @@ namespace Herope {
 		}
 
 		public override IEnumerator OnUpdate () {
-			yield return new WaitWhile(() => !Input.GetMouseButtonUp(0));
+			yield return new WaitUntil(() => Input.anyKeyDown);
 
 			//AudioSource source = AppManager.Instance.m_audioManager.CreateSe ("Sys_Enter");
 			//source.Play ();
