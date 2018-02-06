@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ToyBox;
+using UnityEngine.UI;
 
 namespace Bucket {
 
@@ -78,6 +79,14 @@ namespace Bucket {
 		public void AddTime() {
 			m_totalTime += Time.deltaTime;
 		}
+
+		/// <summary>
+		/// タイマーの時間を追加する
+		/// </summary>
+		/// <param name="arg_seconds">秒</param>
+		public void AddTime(float arg_seconds) {
+			m_totalTime += arg_seconds;
+		}
 	}
 
 	public class MainScene : Scene {
@@ -104,10 +113,21 @@ namespace Bucket {
 		private CameraController m_cameraController;
 
 		//スコア
-		public readonly GameScore m_gameScore = new GameScore();
+		public static readonly GameScore m_gameScore = new GameScore();
 
 		//タイマー
-		public readonly GameTimer m_gameTimer = new GameTimer();
+		public static readonly GameTimer m_gameTimer = new GameTimer();
+
+
+		//-----------------------------------------
+		//	UI
+			[Header("UI")]
+		//-----------------------------------------
+		[SerializeField]
+		private Text m_minuteTimeText;
+
+		[SerializeField]
+		private Text m_secondTimeText;
 
 		public override IEnumerator OnEnter() {
 
@@ -137,8 +157,14 @@ namespace Bucket {
 		public override IEnumerator OnUpdate() {
 			while (true) {
 
+				#region タイマー更新
+				m_minuteTimeText.text = ((int)m_gameTimer.Minutes).ToString().PadLeft(2,'0');
+				m_secondTimeText.text = ((int)m_gameTimer.Seconds).ToString().PadLeft(2,'0');
+
 				//タイマー更新
 				m_gameTimer.AddTime();
+				#endregion
+
 				yield return null;
 			}
 		}
