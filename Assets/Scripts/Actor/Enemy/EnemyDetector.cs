@@ -7,8 +7,7 @@ public class EnemyDetector : MonoBehaviour {
     private enum DetectorType
     {
         ItemHit,
-        ItemFound,
-        PlayerSearching
+        ItemFound
     }
 
     [SerializeField]
@@ -46,11 +45,7 @@ public class EnemyDetector : MonoBehaviour {
                     m_noticeTarget.SendMessage("MoveDirectionChange");
                     m_noticeTarget.SendMessage("LookBack");
                     break;
-                case DetectorType.PlayerSearching:
-                    
-                    m_noticeTarget.SendMessage("OnFoundTarget");
 
-                    break;
             }
         }
 
