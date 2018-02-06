@@ -107,16 +107,18 @@ namespace Bucket {
 		/// <summary>
 		/// 何かに設置したときに実行される
 		/// </summary>
-		protected virtual void OnGroundEnter(object arg_collider) {
+		protected virtual void OnGroundEnter() {
 			
-			Collider2D collider = arg_collider as Collider2D;
-
 			//滑り止め
 			m_rigidbody.velocity = new Vector2(0,m_rigidbody.velocity.y);
 
 			//接地した情報からItemを抽出する
-			if (collider.gameObject.layer == LayerMask.NameToLayer("Item")) {
-				Item item = collider.gameObject.GetComponent<Item>();
+			RaycastHit2D hitInfo = Physics2D.BoxCast(
+				m_foot.transform.position , m_foot.bounds.size ,
+				0 , Vector2.zero , 0 , 1 << LayerMask.NameToLayer("Item"));
+
+			if (hitInfo) {
+				Item item = hitInfo.transform.GetComponent<Item>();
 				if (item) {
 					this.m_itemParent = item;
 					GetRoot().RegisterChild(this);
