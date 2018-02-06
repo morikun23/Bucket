@@ -86,7 +86,7 @@ namespace Bucket {
 			private bool IsDeadEnd() {
 				if (Physics2D.BoxCast(_.transform.position ,
 					Vector2.one , 0 , Vector2.right * (int)_.m_currentDirection ,
-					0.1f , 1 << LayerMask.NameToLayer("Ground"))) {
+					0.1f , 1 << LayerMask.NameToLayer("Ground") | 1 << LayerMask.NameToLayer("Item"))) {
 					return true;
 				}
 				return false;
