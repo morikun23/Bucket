@@ -5,8 +5,7 @@ using UnityEngine;
 namespace Bucket {
 	public class EnemyBehaviour : ActorBase {
 
-        [SerializeField]
-		private GameObject m_player;
+        protected GameObject m_player;
         
         [SerializeField,Range(1,3)]
         private float m_sideTargetNum = 2;
@@ -16,26 +15,36 @@ namespace Bucket {
         [SerializeField, Range(0.5f,1)]
         private float m_attackSpeed;
 
+        [SerializeField]
+        private float m_viewLength;
+
+        [SerializeField]
+        private LayerMask m_enemyRayMask;
+
+        [SerializeField]
+        protected Animator m_anim;
+
         private Vector2 m_targetPos;
         private Vector2 m_startPos;
 
-        private bool m_isPlayerFound = false;
-        private bool m_isItemFound = false;
-        private bool m_isSwoon = false;
+        protected bool m_isPlayerFound = false;
+        protected bool m_isItemFound = false;
+        protected bool m_isSwoon = false;
+
+        private bool m_isAttack = false;
 
         // ラジアン変数
         private float m_rad;
 
         // Use this for initialization
-        void Start() {
+        protected virtual void Start() {
 
-            //m_player = FindObjectOfType<Player>().gameObject;
 
             m_moveSpeed = m_speed;
 
             m_startPos = transform.position;
 
-            m_targetPos = new Vector2(m_startPos.x - m_sideTargetNum, transform.position.y);
+            m_targetPos = new Vector2(m_startPos.x+ m_sideTargetNum, transform.position.y);
 
 
             m_rad = Mathf.Atan2(
@@ -43,23 +52,40 @@ namespace Bucket {
             m_targetPos.x - transform.position.x);
         }
 
-		// Update is called once per frame
-		void Update() {
+        // Update is called once per frame
+        protected virtual void Update() {
 
-             if (Input.GetKeyDown(KeyCode.Space)) m_isItemFound = false;
+            RaycastHit2D hit = Physics2D.Raycast(transform.position, transform.localScale.x * Vector3.right, m_viewLength, m_enemyRayMask);
 
-             Vector2 position = transform.position;
+            if (hit.collider)
+            {
+
+                if (hit.collider.gameObject.layer == LayerMask.NameToLayer("Player"))
+                {
+
+                    if (!m_isPlayerFound)
+                        OnFoundTarget();
+                }
+            }
+
+            if (Input.GetKeyDown(KeyCode.Space)) m_isItemFound = false;
+
+            Vector2 position = transform.position;
 
             //色々処理したい
             if (m_isSwoon)//気絶中
             {
                 position = transform.position;
             }
-            else if (m_isPlayerFound)//プレイヤー発見中
+            else if(m_isPlayerFound && !m_isAttack)//プレイヤー発見待機中
+            {
+                position = transform.position;
+            }
+            else if (m_isAttack)//プレイヤー追跡中
             {
                 position.x += m_attackSpeed * Mathf.Cos(m_rad);
 
-                if (Vector2.Distance(position, m_targetPos) < 0.3f)
+                if (Vector2.Distance(position, m_targetPos) < 0.1f)
                 {
                     position = m_targetPos;
                 }
@@ -91,19 +117,29 @@ namespace Bucket {
 
             if(m_isPlayerFound)return;
 
+            m_isPlayerFound = true;
+        }
+
+        /// <summary>
+		/// ターゲットをプレイヤーに設定する
+		/// </summary>
+		protected void OnSetTargetPlayer()
+        {
+            if (m_player == null) m_player = FindObjectOfType<Player>().gameObject;
+
             m_targetPos = m_player.transform.position;
             m_rad = Mathf.Atan2(
                 m_targetPos.y - transform.position.y,
                 m_targetPos.x - transform.position.x);
 
-            m_isPlayerFound = true;
+            m_isAttack = true;
             Invoke("OnLostTarget", 3);
         }
 
-		/// <summary>
-		/// 標的を見失ったときに実行される
-		/// </summary>
-		private void OnLostTarget() {
+        /// <summary>
+        /// 標的を見失ったときに実行される
+        /// </summary>
+        private void OnLostTarget() {
 
             m_startPos = transform.position;
 
@@ -116,6 +152,8 @@ namespace Bucket {
             m_targetPos.y - transform.position.y,
             m_targetPos.x - transform.position.x);
 
+
+            m_isAttack = false;
             m_isPlayerFound = false;
         }
 
@@ -166,6 +204,14 @@ namespace Bucket {
         {
             m_isSwoon = true;
         }
+        
+        /// <summary>
+		/// Itemから呼ばれる気絶化関数
+		/// </summary>
+        private void OnCollidedItem()
+        {
+            this.OnSwoon();
 
+        }
     }
 }
