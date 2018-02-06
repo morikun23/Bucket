@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 using ToyBox;
+using UnityEngine.UI;
 
 namespace Bucket {
 
@@ -78,6 +79,14 @@ namespace Bucket {
 		public void AddTime() {
 			m_totalTime += Time.deltaTime;
 		}
+
+		/// <summary>
+		/// タイマーの時間を追加する
+		/// </summary>
+		/// <param name="arg_seconds">秒</param>
+		public void AddTime(float arg_seconds) {
+			m_totalTime += arg_seconds;
+		}
 	}
 
 	public class MainScene : Scene {
@@ -109,6 +118,22 @@ namespace Bucket {
 		//タイマー
 		public readonly GameTimer m_gameTimer = new GameTimer();
 
+		[SerializeField]
+		private Stage m_stage;
+
+		//-----------------------------------------
+		//	UI
+			[Header("UI")]
+		//-----------------------------------------
+		[SerializeField]
+		private Text m_minuteTimeText;
+
+		[SerializeField]
+		private Text m_secondTimeText;
+
+		private bool m_isGamePlaying;
+
+
 		public override IEnumerator OnEnter() {
 
 			#region プレイヤーの生成
@@ -123,6 +148,7 @@ namespace Bucket {
 			m_cameraController.SetFocusTarget(m_player.gameObject);
 
 			#region ステージの起動
+			m_stage.Initialize(m_player);
 
 			#endregion
 
@@ -131,14 +157,22 @@ namespace Bucket {
 
 			//タイマー始動
 			m_gameTimer.Reset();
-
+			
+			
+			m_isGamePlaying = true;
 		}
 
 		public override IEnumerator OnUpdate() {
-			while (true) {
+			while (m_isGamePlaying) {
+
+				#region タイマー更新
+				m_minuteTimeText.text = ((int)m_gameTimer.Minutes).ToString().PadLeft(2,'0');
+				m_secondTimeText.text = ((int)m_gameTimer.Seconds).ToString().PadLeft(2,'0');
 
 				//タイマー更新
 				m_gameTimer.AddTime();
+				#endregion
+				
 				yield return null;
 			}
 		}
@@ -147,6 +181,13 @@ namespace Bucket {
 			AppManager.Instance.fade.StartFade(new FadeOut() , Color.black , 0.5f);
 			yield return new WaitWhile(AppManager.Instance.fade.IsFading);
 			UnityEngine.SceneManagement.SceneManager.LoadScene("SceneResult");
+		}
+
+		/// <summary>
+		/// プレイヤーがゴールしたときに実行される
+		/// </summary>
+		public void OnPlayerDoesGoaled(){
+			m_isGamePlaying = false;
 		}
 	}
 }

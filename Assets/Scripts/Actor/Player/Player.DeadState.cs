@@ -44,6 +44,7 @@ namespace Bucket {
 			/// </summary>
 			/// <returns></returns>
 			IPlayerState IPlayerState.GetNextState() {
+				if (!_.m_dead) return new IdleState(_);
 				return null;
 			}
 		}
