@@ -113,11 +113,13 @@ namespace Bucket {
 		private CameraController m_cameraController;
 
 		//スコア
-		public static readonly GameScore m_gameScore = new GameScore();
+		public readonly GameScore m_gameScore = new GameScore();
 
 		//タイマー
-		public static readonly GameTimer m_gameTimer = new GameTimer();
+		public readonly GameTimer m_gameTimer = new GameTimer();
 
+		[SerializeField]
+		private Stage m_stage;
 
 		//-----------------------------------------
 		//	UI
@@ -128,6 +130,9 @@ namespace Bucket {
 
 		[SerializeField]
 		private Text m_secondTimeText;
+
+		private bool m_isGamePlaying;
+
 
 		public override IEnumerator OnEnter() {
 
@@ -143,6 +148,7 @@ namespace Bucket {
 			m_cameraController.SetFocusTarget(m_player.gameObject);
 
 			#region ステージの起動
+			m_stage.Initialize(m_player);
 
 			#endregion
 
@@ -151,11 +157,13 @@ namespace Bucket {
 
 			//タイマー始動
 			m_gameTimer.Reset();
-
+			
+			
+			m_isGamePlaying = true;
 		}
 
 		public override IEnumerator OnUpdate() {
-			while (true) {
+			while (m_isGamePlaying) {
 
 				#region タイマー更新
 				m_minuteTimeText.text = ((int)m_gameTimer.Minutes).ToString().PadLeft(2,'0');
@@ -164,7 +172,7 @@ namespace Bucket {
 				//タイマー更新
 				m_gameTimer.AddTime();
 				#endregion
-
+				
 				yield return null;
 			}
 		}
@@ -173,6 +181,13 @@ namespace Bucket {
 			AppManager.Instance.fade.StartFade(new FadeOut() , Color.black , 0.5f);
 			yield return new WaitWhile(AppManager.Instance.fade.IsFading);
 			UnityEngine.SceneManagement.SceneManager.LoadScene("SceneResult");
+		}
+
+		/// <summary>
+		/// プレイヤーがゴールしたときに実行される
+		/// </summary>
+		public void OnPlayerDoesGoaled(){
+			m_isGamePlaying = false;
 		}
 	}
 }
