@@ -38,6 +38,9 @@ namespace Bucket {
 		/// 自身が掴まれたときに実行される
 		/// </summary>
 		private void OnGrasped() {
+
+			m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+
 			m_itemParent = null;
 			m_rigidbody.isKinematic = true;
 			m_rigidbody.velocity = Vector2.zero;
@@ -108,7 +111,9 @@ namespace Bucket {
 		/// 何かに設置したときに実行される
 		/// </summary>
 		protected virtual void OnGroundEnter() {
-			
+
+			m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionX;
+
 			//滑り止め
 			m_rigidbody.velocity = new Vector2(0,m_rigidbody.velocity.y);
 
