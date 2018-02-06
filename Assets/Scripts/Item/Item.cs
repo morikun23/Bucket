@@ -14,11 +14,9 @@ namespace Bucket {
 		[SerializeField]
 		private Item m_itemParent;
 
-		/// <summary>
-		/// 自身より上段にあるアイテムたち
-		/// ※自身が最下段のときにのみ使用される
-		/// </summary>
-		private readonly Stack<Item> m_itemChildren = new Stack<Item>();
+		/// <summary>自身より上段にあるアイテム</summary>
+		[SerializeField]
+		private Item m_itemChild;
 
 		/// <summary>自身の衝突用コライダー</summary>
 		[SerializeField]
@@ -38,7 +36,12 @@ namespace Bucket {
 		/// 自身が掴まれたときに実行される
 		/// </summary>
 		private void OnGrasped() {
-			m_itemParent = null;
+
+			m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation;
+
+			if (m_itemParent != null) {
+				m_itemParent.UnRegisterChild(this);
+			}
 			m_rigidbody.isKinematic = true;
 			m_rigidbody.velocity = Vector2.zero;
 			m_body.enabled = false;
@@ -69,22 +72,19 @@ namespace Bucket {
 		/// </summary>
 		/// <returns></returns>
 		public Item GetGraspableItem() {
-			Item item = null;
-			Item root = GetRoot();
+			Item item = GetRoot();
 			
-			if (root.m_itemChildren.Count > 0) { item = root.m_itemChildren.Pop(); }
-			else { item = this; }
 			item.OnGrasped();
 			return item;
 		}
 		
 		/// <summary>
-		/// 最下段にあるアイテムを取得する
+		/// 最上段にあるアイテムを取得する
 		/// </summary>
 		/// <returns></returns>
 		private Item GetRoot() {
-			if(m_itemParent != null) {
-				return m_itemParent.GetRoot();
+			if(m_itemChild != null) {
+				return m_itemChild.GetRoot();
 			}
 			return this;
 		}
@@ -95,9 +95,17 @@ namespace Bucket {
 		/// </summary>
 		/// <param name="arg_child"></param>
 		public void RegisterChild(Item arg_child) {
-			//不整合防止のため、すでに登録されている場合は中断する
-			if (m_itemChildren.Contains(arg_child)) return;
-			m_itemChildren.Push(arg_child);
+			m_itemChild = arg_child;
+			m_itemChild.m_itemParent = this;
+		}
+
+		/// <summary>
+		/// 親子関係を解除する
+		/// </summary>
+		/// <param name="arg_child"></param>
+		public void UnRegisterChild(Item arg_child) {
+			m_itemChild.m_itemParent = null;
+			m_itemChild = null;
 		}
 
 		//----------------------------------------------
@@ -107,19 +115,23 @@ namespace Bucket {
 		/// <summary>
 		/// 何かに設置したときに実行される
 		/// </summary>
-		protected virtual void OnGroundEnter(object arg_collider) {
-			
-			Collider2D collider = arg_collider as Collider2D;
+		protected virtual void OnGroundEnter() {
+
+			m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionX;
 
 			//滑り止め
 			m_rigidbody.velocity = new Vector2(0,m_rigidbody.velocity.y);
 
 			//接地した情報からItemを抽出する
-			if (collider.gameObject.layer == LayerMask.NameToLayer("Item")) {
-				Item item = collider.gameObject.GetComponent<Item>();
+			RaycastHit2D hitInfo = Physics2D.BoxCast(
+				m_foot.transform.position , m_foot.bounds.size ,
+				0 , Vector2.zero , 0 , 1 << LayerMask.NameToLayer("Item"));
+
+			if (hitInfo) {
+				Item item = hitInfo.transform.GetComponent<Item>();
 				if (item) {
 					this.m_itemParent = item;
-					GetRoot().RegisterChild(this);
+					item.RegisterChild(this);
 				}
 			}
 		}
@@ -128,7 +140,9 @@ namespace Bucket {
 		/// 設置状態が解除された時に実行される
 		/// </summary>
 		protected virtual void OnGroundExit() {
-
+			if(m_itemParent != null) {
+				m_itemParent.UnRegisterChild(this);
+			}
 		}
 
 		

@@ -5,12 +5,23 @@ using UnityEngine;
 namespace Bucket {
 	public class PlayerController : MonoBehaviour {
 
-		[SerializeField]
+		
+		//-----------------------------------------
+		//	デフォルト設定
+		[Header("Default Settings")]
+		//-----------------------------------------
+
+		/// <summary>制御する対象</summary>
 		private Player m_player;
 
-		[SerializeField]
+		/// <summary>アイテムを制御するためのクラス</summary>
 		private ItemHolder m_itemHolder;
-		
+
+		//-----------------------------------------
+		//	ボタン設定
+			[Header("Buttons")]
+		//-----------------------------------------
+
 		[SerializeField]
 		private InputCommand m_leftKey;
 
@@ -24,10 +35,13 @@ namespace Bucket {
 		private InputCommand m_downKey;
 
 		[SerializeField]
-		private InputCommand m_spaceKey;
+		private InputCommand m_actionKey;
 
-		// Use this for initialization
-		void Start() {
+		public void Initialize(Player arg_player) {
+
+			m_player = arg_player;
+			m_itemHolder = m_player.GetComponentInChildren<ItemHolder>();
+
 			m_rightKey.AddCallBack(new CommandAction(InputTrigger.LongPress,OnMoveButtonDown,(int)ActorBase.Direction.RIGHT));
 			m_rightKey.AddCallBack(new CommandAction(InputTrigger.Release , OnMoveButtonUp , (int)ActorBase.Direction.RIGHT));
 			m_leftKey.AddCallBack(new CommandAction(InputTrigger.LongPress , OnMoveButtonDown , (int)ActorBase.Direction.LEFT));
@@ -35,14 +49,13 @@ namespace Bucket {
 			m_downKey.AddCallBack(new CommandAction(InputTrigger.Press , OnHideButtonDown));
 			m_downKey.AddCallBack(new CommandAction(InputTrigger.Release , OnHideButtonUp));
 
-			m_spaceKey.AddCallBack(new CommandAction(InputTrigger.Press , OnActionButtonDown));
+			m_actionKey.AddCallBack(new CommandAction(InputTrigger.Press , OnActionButtonDown));
 		}
 
-		// Update is called once per frame
-		void Update() {
-
-		}
-
+		/// <summary>
+		/// 移動ボタンが押されたとき
+		/// </summary>
+		/// <param name="arg_direction"></param>
 		private void OnMoveButtonDown(object arg_direction) {
 
 			int direction = (int)arg_direction;
@@ -54,6 +67,10 @@ namespace Bucket {
 			}
 		}
 
+		/// <summary>
+		/// 移動ボタンが離されたとき
+		/// </summary>
+		/// <param name="arg_direction"></param>
 		private void OnMoveButtonUp(object arg_direction) {
 			int direction = (int)arg_direction;
 
@@ -64,14 +81,25 @@ namespace Bucket {
 			}
 		}
 
+		/// <summary>
+		/// 隠れるボタンが押されたとき
+		/// </summary>
 		private void OnHideButtonDown() {
-			m_player.Hide();
+			if (m_player.IsGrounded()) {
+				m_player.Hide();
+			}
 		}
 
+		/// <summary>
+		/// 隠れるボタンが離された時
+		/// </summary>
 		private void OnHideButtonUp() {
 			m_player.Show();
 		}
 
+		/// <summary>
+		/// アクションボタンが押されたとき
+		/// </summary>
 		private void OnActionButtonDown() {
 
 			if(m_player.GetCurrentState() == typeof(Player.HideState)) {
@@ -82,15 +110,17 @@ namespace Bucket {
 				m_itemHolder.Throw();
 				return;
 			}
-			else{
-				if (m_player.IsGrounded()) {
-					m_itemHolder.Grasp();
-					if (m_itemHolder.IsHolding()) {
-						return;
-					}
+			else if (m_player.IsGrounded()) {
+				m_itemHolder.Grasp();
+
+				//掴むアイテムが無ければジャンプを行う
+				if (m_itemHolder.IsHolding()) {
+					return;
 				}
+				m_player.Jump();
 			}
-			m_player.Jump();
+		
+			
 		}
 	}
 }
