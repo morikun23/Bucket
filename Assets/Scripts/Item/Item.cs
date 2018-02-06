@@ -26,8 +26,12 @@ namespace Bucket {
 		[SerializeField]
 		private BoxCollider2D m_foot;
 
+		/// <summary>索敵コライダー</summary>
+		[SerializeField]
+		private CircleCollider2D m_searchArea;
+
 		private void Start() {
-			if(m_itemParent != null) {
+			if (m_itemParent != null) {
 				GetRoot().RegisterChild(this);
 			}
 		}
@@ -42,6 +46,7 @@ namespace Bucket {
 			if (m_itemParent != null) {
 				m_itemParent.UnRegisterChild(this);
 			}
+
 			m_rigidbody.isKinematic = true;
 			m_rigidbody.velocity = Vector2.zero;
 			m_body.enabled = false;
@@ -53,6 +58,7 @@ namespace Bucket {
 		private void OnRelease() {
 			m_rigidbody.isKinematic = false;
 			m_body.enabled = true;
+			m_searchArea.enabled = true;
 		}
 
 		/// <summary>
@@ -62,10 +68,10 @@ namespace Bucket {
 		public void Throw(Vector2 arg_velocity) {
 
 			//射出する
-			m_rigidbody.AddForce(arg_velocity * m_rigidbody.mass, ForceMode2D.Impulse);
+			m_rigidbody.AddForce(arg_velocity * m_rigidbody.mass , ForceMode2D.Impulse);
 			this.OnRelease();
 		}
-		
+
 		/// <summary>
 		/// アイテムを取得する
 		/// 自身の頭上にアイテムが置いてある場合はそちらを渡す
@@ -73,17 +79,17 @@ namespace Bucket {
 		/// <returns></returns>
 		public Item GetGraspableItem() {
 			Item item = GetRoot();
-			
+
 			item.OnGrasped();
 			return item;
 		}
-		
+
 		/// <summary>
 		/// 最上段にあるアイテムを取得する
 		/// </summary>
 		/// <returns></returns>
 		private Item GetRoot() {
-			if(m_itemChild != null) {
+			if (m_itemChild != null) {
 				return m_itemChild.GetRoot();
 			}
 			return this;
@@ -120,31 +126,50 @@ namespace Bucket {
 			m_rigidbody.constraints = RigidbodyConstraints2D.FreezeRotation | RigidbodyConstraints2D.FreezePositionX;
 
 			//滑り止め
-			m_rigidbody.velocity = new Vector2(0,m_rigidbody.velocity.y);
+			m_rigidbody.velocity = new Vector2(0 , m_rigidbody.velocity.y);
 
+			#region 敵キャラが近くにいたらこちらを振り向かせる
+			RaycastHit2D enemyInfo = Physics2D.CircleCast(
+				m_searchArea.transform.position , m_searchArea.radius ,
+				Vector2.zero , 0 , 1 << LayerMask.NameToLayer("SearchArea"));
+
+			if (enemyInfo) {
+				SearchArea searchArea = enemyInfo.transform.GetComponent<SearchArea>();
+				if (searchArea)
+					searchArea.OnEncountItem(this);
+			}
+			m_searchArea.enabled = false;
+			#endregion
+
+			#region アイテムの上に置かれたら積み重ねる
 			//接地した情報からItemを抽出する
 			RaycastHit2D hitInfo = Physics2D.BoxCast(
 				m_foot.transform.position , m_foot.bounds.size ,
-				0 , Vector2.zero , 0 , 1 << LayerMask.NameToLayer("Item"));
+				0 , Vector2.zero , 0 , 1 << LayerMask.NameToLayer("Item") | 1 << LayerMask.NameToLayer("Ground"));
 
-			if (hitInfo) {
+			if (!hitInfo) return;
+
+			if (hitInfo.transform.gameObject.layer == LayerMask.NameToLayer("Item")) {
 				Item item = hitInfo.transform.GetComponent<Item>();
 				if (item) {
 					this.m_itemParent = item;
 					item.RegisterChild(this);
 				}
 			}
+			#endregion
 		}
 
 		/// <summary>
 		/// 設置状態が解除された時に実行される
 		/// </summary>
 		protected virtual void OnGroundExit() {
-			if(m_itemParent != null) {
+			if (m_itemParent != null) {
 				m_itemParent.UnRegisterChild(this);
 			}
 		}
 
-		
+		private void OnCollided() {
+			Destroy(this.gameObject);
+		}
 	}
 }
