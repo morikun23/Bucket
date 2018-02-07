@@ -45,6 +45,7 @@ namespace ToyBox {
 		/// <param name="arg_fadeInfo">フェード情報</param>
 		public void OnExit(Fade.FadeInfo arg_fadeInfo) {
 			arg_fadeInfo.m_currentAlpha = Fade.FadeInfo.ZERO;
+			arg_fadeInfo.m_fadeObject.gameObject.SetActive(false);
 		}
 	}
 }

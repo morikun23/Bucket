@@ -78,7 +78,6 @@ namespace ToyBox {
 			}
 			m_fadeAction.OnExit(this.m_fadeInfo);
 			m_isActive = false;
-			m_fadeInfo.m_fadeObject.gameObject.SetActive(false);
 		}
 
 		/// <summary>
