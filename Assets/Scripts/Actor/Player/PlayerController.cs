@@ -85,7 +85,7 @@ namespace Bucket {
 		/// 隠れるボタンが押されたとき
 		/// </summary>
 		private void OnHideButtonDown() {
-			if (m_player.IsGrounded()) {
+			if (m_player.IsGrounded() && !m_itemHolder.IsHolding()) {
 				m_player.Hide();
 			}
 		}
