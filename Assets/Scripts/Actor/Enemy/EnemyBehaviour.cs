@@ -213,5 +213,12 @@ namespace Bucket {
             this.OnSwoon();
 
         }
+
+        private void KillPlayer() {
+            if (m_player == null) m_player = FindObjectOfType<Player>().gameObject;
+
+            m_player.GetComponent<Player>().Dead();
+
+        }
     }
 }
