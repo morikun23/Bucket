@@ -40,8 +40,8 @@ namespace Bucket
         {
             m_anim.SetBool("Find", true);
             m_anim.Update(0);
-            yield return new Tsubakit.WaitForAnimation(m_anim,0);
-            m_anim.SetBool("Find", false);
+            yield return new WaitForSeconds(1);
+			m_anim.SetBool("Find", false);
             OnSetTargetPlayer();
         }
 
@@ -50,7 +50,7 @@ namespace Bucket
         {
             m_anim.SetBool("Stun", true);
             m_anim.Update(0);
-            yield return new Tsubakit.WaitForAnimation(m_anim, 0);
+			yield return new WaitForSeconds(3);
 
             m_anim.SetBool("Stun", false);
             m_isSwoon = false;
