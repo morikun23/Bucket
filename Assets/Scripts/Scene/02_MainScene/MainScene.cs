@@ -113,10 +113,10 @@ namespace Bucket {
 		private CameraController m_cameraController;
 
 		//スコア
-		public readonly GameScore m_gameScore = new GameScore();
+		public static readonly GameScore m_gameScore = new GameScore();
 
 		//タイマー
-		public readonly GameTimer m_gameTimer = new GameTimer();
+		public static readonly GameTimer m_gameTimer = new GameTimer();
 
 		[SerializeField]
 		private Stage m_stage;
