@@ -29,10 +29,10 @@ namespace Bucket {
 		/// </summary>
 		public int m_goalPoint;
 		
-		public static int TotalScore {
+		public int TotalScore {
 			get {
-				//TODO:スコア計算式をここに記述
-				return 0;
+				//スコア計算式
+				return m_goalPoint + (9999 - m_limitTime);
 			}
 		}
 	}
@@ -178,6 +178,9 @@ namespace Bucket {
 		}
 
 		public override IEnumerator OnExit() {
+
+			m_gameScore.m_limitTime = (int)m_gameTimer.TotalTime;
+
 			AppManager.Instance.fade.StartFade(new FadeOut() , Color.black , 0.5f);
 			yield return new WaitWhile(AppManager.Instance.fade.IsFading);
 			UnityEngine.SceneManagement.SceneManager.LoadScene("SceneResult");

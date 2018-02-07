@@ -73,6 +73,7 @@ namespace Bucket {
 		/// プレイヤーがゴールしたときに実行される
 		/// </summary>
 		private void OnPlayerDoesGoaled() {
+			MainScene.m_gameScore.m_goalPoint = m_onGoalScore;
 			m_sceneManager.OnPlayerDoesGoaled();
 		}
 

@@ -18,10 +18,14 @@ namespace Bucket {
 		private AudioSource bgm_;
 
 		public override IEnumerator OnEnter() {
+			
+			m_scoreText.text = MainScene.m_gameScore.TotalScore.ToString();
+			m_timeText.text = 
+				((int)MainScene.m_gameTimer.Minutes).ToString().PadLeft(2 , '0') 
+				+ ((int)MainScene.m_gameTimer.Seconds).ToString().PadLeft(2 , '0');
+
 			AppManager.Instance.fade.StartFade(new FadeIn() , Color.black , 0.5f);
 			yield return new WaitWhile(AppManager.Instance.fade.IsFading);
-
-			m_scoreText.text = GameScore.TotalScore.ToString();
 		}
 
 		public override IEnumerator OnUpdate() {
